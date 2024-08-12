@@ -28,10 +28,19 @@ def init_db():
                             quantity INTEGER NOT NULL
                         ); """
 
+    sales_table = """ CREATE TABLE IF NOT EXISTS sales (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        product_id INTEGER NOT NULL,
+                        quantity INTEGER NOT NULL,
+                        sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (product_id) REFERENCES products (id)
+                    ); """
+
     conn = create_connection()
 
     if conn is not None:
         create_table(conn, products_table)
+        create_table(conn, sales_table)
         conn.close()
     else:
         print("Error! Cannot create the database connection.")

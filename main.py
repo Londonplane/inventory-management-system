@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends
 from typing import List
 import sqlite3
-from models import Product, ProductCreate
+from datetime import datetime
+from models import Product, ProductCreate, Sale, SaleCreate, InventoryReport
 from database import create_connection, init_db
 
 app = FastAPI()
@@ -19,7 +20,7 @@ def get_db():
 async def startup_event():
     init_db()
 
-## API routes
+## API routes (add endpoints)
 
 @app.get("/")
 def read_root():
@@ -80,3 +81,49 @@ def delete_product(product_id: int, db: sqlite3.Connection = Depends(get_db)):
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product deleted successfully"}
+
+
+# Sales Management
+@app.post("/sales/", response_model=Sale)
+def create_sale(sale: SaleCreate, db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    
+    # Check if product exists and has enough quantity
+    cursor.execute("SELECT quantity FROM products WHERE id = ?", (sale.product_id,))
+    product = cursor.fetchone()
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
+    if product[0] < sale.quantity:
+        raise HTTPException(status_code=400, detail="Not enough inventory")
+    
+    # Create sale record
+    cursor.execute("""
+        INSERT INTO sales (product_id, quantity)
+        VALUES (?, ?)
+    """, (sale.product_id, sale.quantity))
+    
+    # Update product quantity
+    cursor.execute("""
+        UPDATE products
+        SET quantity = quantity - ?
+        WHERE id = ?
+    """, (sale.quantity, sale.product_id))
+    
+    db.commit()
+    sale_id = cursor.lastrowid
+    return Sale(id=sale_id, product_id=sale.product_id, quantity=sale.quantity, sale_date=datetime.now())
+
+
+# Inventory Management
+@app.get("/inventory/", response_model=List[InventoryReport])
+def get_inventory_report(db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT p.id, p.name, p.quantity, COALESCE(SUM(s.quantity), 0) as total_sales
+        FROM products p
+        LEFT JOIN sales s ON p.id = s.product_id
+        GROUP BY p.id
+    """)
+    inventory = cursor.fetchall()
+    return [InventoryReport(product_id=row[0], product_name=row[1], current_quantity=row[2], total_sales=row[3]) 
+            for row in inventory]

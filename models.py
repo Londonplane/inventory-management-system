@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 class ProductBase(BaseModel):
     name: str
@@ -13,4 +14,24 @@ class Product(ProductBase):
     id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+class SaleBase(BaseModel):
+    product_id: int
+    quantity: int = Field(gt=0)
+
+class SaleCreate(SaleBase):
+    pass
+
+class Sale(SaleBase):
+    id: int
+    sale_date: datetime
+
+    class Config:
+        orm_mode = True
+
+class InventoryReport(BaseModel):
+    product_id: int
+    product_name: str
+    current_quantity: int
+    total_sales: int
