@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            overflow: hidden;
+            padding: 0 20px;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            background: #333;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: opacity 0.2s ease-in;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+        #product-list {
+            margin-top: 20px;
+        }
+        .product-item {
+            background: #fff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        #add-product-form {
+            background: #fff;
+            padding: 1rem;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        #add-product-form input[type="text"],
+        #add-product-form input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="notification" style="display: none; padding: 10px; margin-bottom: 10px; border-radius: 5px;"></div>
+            <h1>Inventory Management System</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="product-list">
+            <h2>Product List</h2>
+            <!-- Products will be dynamically added here -->
+        </section>
+
+        <section id="add-product">
+            <h2>Add New Product</h2>
+            <form id="add-product-form">
+                <input type="text" id="name" name="name" placeholder="Product Name" required>
+                <input type="text" id="description" name="description" placeholder="Product Description">
+                <input type="number" id="price" name="price" placeholder="Price" step="0.01" required>
+                <input type="number" id="quantity" name="quantity" placeholder="Quantity" required>
+                <button type="submit" class="btn">Add Product</button>
+            </form>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function showNotification(message, isError = false) {
+            const notificationElement = document.getElementById('notification');
+            notificationElement.textContent = message;
+            notificationElement.style.backgroundColor = isError ? '#ffcccc' : '#ccffcc';
+            notificationElement.style.display = 'block';
+            setTimeout(() => {
+                notificationElement.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
